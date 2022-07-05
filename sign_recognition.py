@@ -86,15 +86,16 @@ name_prompt = True
 gesture_name = ''
 all_names = []
 known_gestures = []
+known_gest_sums = []  #==========
 print("Press n To Add New Gesture")
 while True:
     ig, frame = cam.read()
     frame = cv2.resize(frame, (width, height))
     frame = cv2.flip(frame, 1)
-    gesture = np.zeros([12,12], dtype=np.float32)
+    cur_gesture = np.zeros([12,12], dtype=np.float32)
     handLM = HandData.findHands(frame)
     for LM in handLM:
-        gesture = readGesture(LM)
+        cur_gesture = readGesture(LM)
 #================================================= Training the software
     if train:
         #=========================================== entering the name
@@ -119,7 +120,8 @@ while True:
                 print("Press t When Ready...")
                 record_prompt = False
             if cv2.waitKey(1) & 0xff == ord('t'):
-                known_gestures.append(gesture)
+                known_gestures.append(cur_gesture)
+                known_gest_sums.append(cur_gesture.sum())
                 record_prompt = True
                 name_prompt = True
                 name = True
@@ -128,15 +130,22 @@ while True:
 #========================================================= gesture learned
 #========================================================= gesture recognition
     else:
-        for mine in known_gestures:
-            a = mine.sum()
-            b = gesture.sum()
-            error = (a-b)
-            print(error)
-            if error < tolerance and error > -tolerance:
-                cv2.putText(frame, 'Five', (0, 40), cv2.FONT_HERSHEY_COMPLEX, 2, (0,0,255), 3)
-            else :
-                cv2.putText(frame, 'Unknown', (0, 40), cv2.FONT_HERSHEY_COMPLEX, 2, (0,0,255), 3)
+        errors = []
+        for known_gesture in known_gest_sums:
+            b = cur_gesture.sum()
+            error = (known_gesture-b)
+            errors.append(abs(error))
+        index = None
+        if errors:
+            best_match = min(errors)
+            if best_match < tolerance:
+                index = errors.index(best_match)
+                #print(best_match, 'Index: ',index)
+
+        if index != None:
+            cv2.putText(frame, all_names[index], (0, 80), cv2.FONT_HERSHEY_COMPLEX, 3, (0,0,255), 3)
+        else :
+            cv2.putText(frame, 'Unknown', (0, 40), cv2.FONT_HERSHEY_COMPLEX, 2, (0,0,255), 3)
 
     cv2.imshow('Frame', frame)
     cv2.moveWindow('Frame', 0,0)
@@ -146,8 +155,10 @@ while True:
         if k == 110:   #n
             train = True
         if k == 112:   #p
-            for name in all_names:
-                print(name , end=' ')
+            print(all_names)
+            print(len(known_gest_sums))
+            print(known_gest_sums)
+            print(errors)
         if k == 113:   #q
             break
 
