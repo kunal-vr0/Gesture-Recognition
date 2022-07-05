@@ -3,9 +3,19 @@ This is a idea of this project is to train the software by recording different g
 I am using openCV for computer vision and meidapipe for hand detection.
 For each hand gesture it records 144 data points and compare them with the recorded gesture and reports positively within some level of tolerance.
 
-I hope to develope the software further and by making it much more accurate.
+Instructions for usage:
 
+#1. Currently, Initially there are no prerecorded gestures.
 
-![Screenshot (430)](https://user-images.githubusercontent.com/108456490/176653881-b07fa8fb-844e-4f95-8263-1c74b0d8b908.png)
-![Screenshot (432)](https://user-images.githubusercontent.com/108456490/176653910-c54bb538-0fdc-4cf3-af9a-385c17f1a6a7.png)
-![Screenshot (435)](https://user-images.githubusercontent.com/108456490/176653944-b3953778-0645-40d5-8adf-b587038bd87a.png)
+#2. Press 'n' to add a new entry.
+
+#3. Write after you press 'n', the program will ask for a name for the gesture in the terminal. It records the name until you press enter key.
+
+#4. Then show the gesture in the camera and press 't' when you are ready to record the gesture.
+
+#5. Once you press 't' the gesture is added to the database and the program will start recognising it. Press 'n' for any new entry and repeat the process.
+
+#6. The program cannot be exited while recording the gesture.
+
+#7. To view the currently added gesture names and number of gestures present in the database press 'p'. Cannot be used while recording the gesture.
+
