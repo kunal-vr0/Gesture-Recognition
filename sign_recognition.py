@@ -98,7 +98,15 @@ if useFile == 'Y':
     elif anyFile == 'N':
         fileName = input("Enter File Name: ")
         fileName += '.pkl'
-    with open(fileName, 'rb') as l:
+    try:
+        l = open(fileName, 'rb')
+    except FileNotFoundError:
+        print("No Such File Exists. Using Default file")
+        fileName = 'gesture.pkl'
+        with open(fileName, 'rb') as l:
+            known_gestures = pickle.load(l)
+            all_names = pickle.load(l)
+    else:
         known_gestures = pickle.load(l)
         all_names = pickle.load(l)
     for i in known_gestures:
@@ -174,6 +182,8 @@ while True:
 
     if not train:
         k = cv2.waitKey(1)
+        if k == 105:   #i
+            print("i: For Instrutions \nn: To Add New Gesture \np: To Print All Recorded Gestures \nq: To Quit")
         if k == 110:   #n
             train = True
         if k == 112:   #p
