@@ -87,6 +87,25 @@ gesture_name = ''
 all_names = []
 known_gestures = []
 known_gest_sums = []  #==========
+#===========================
+fileName = 'gesture.pkl'
+#==================================================================== Wanna Use existing file?
+useFile = input("Do You Want To Use Existing Gestures? (Y/N) ");
+if useFile == 'Y':
+    anyFile = input("Do You Want To Use Default File? (Y/N) ")
+    if anyFile == 'Y':
+        print("Default Data Is Being Used")
+    elif anyFile == 'N':
+        fileName = input("Enter File Name: ")
+        fileName += '.pkl'
+    with open(fileName, 'rb') as l:
+        known_gestures = pickle.load(l)
+        all_names = pickle.load(l)
+    for i in known_gestures:
+        known_gest_sums.append(i.sum())
+elif useFile == 'N':
+    print("Your Default Data Would Be Updated")
+#====================================================================
 print("Press n To Add New Gesture")
 while True:
     ig, frame = cam.read()
@@ -122,6 +141,9 @@ while True:
             if cv2.waitKey(1) & 0xff == ord('t'):
                 known_gestures.append(cur_gesture)
                 known_gest_sums.append(cur_gesture.sum())
+                with open('gesture.pkl', 'wb') as l:
+                    pickle.dump(known_gestures, l)
+                    pickle.dump(all_names, l)
                 record_prompt = True
                 name_prompt = True
                 name = True
