@@ -80,13 +80,40 @@ tolerance = 3
 #=====================
 train = False
 record_prompt = False
-name = True
+name = False
 name_prompt = True
 #=====================
 gesture_name = ''
 all_names = []
 known_gestures = []
 known_gest_sums = []  #==========
+#===========================
+fileName = 'gesture.pkl'
+#==================================================================== Wanna Use existing file?
+useFile = input("Do You Want To Use Existing Gestures? (Y/N) ");
+if useFile == 'Y':
+    anyFile = input("Do You Want To Use Default File? (Y/N) ")
+    if anyFile == 'Y':
+        print("Default Data Is Being Used")
+    elif anyFile == 'N':
+        fileName = input("Enter File Name: ")
+        fileName += '.pkl'
+    try:
+        l = open(fileName, 'rb')
+    except FileNotFoundError:
+        print("No Such File Exists. Using Default file")
+        fileName = 'gesture.pkl'
+        with open(fileName, 'rb') as l:
+            known_gestures = pickle.load(l)
+            all_names = pickle.load(l)
+    else:
+        known_gestures = pickle.load(l)
+        all_names = pickle.load(l)
+    for i in known_gestures:
+        known_gest_sums.append(i.sum())
+elif useFile == 'N':
+    print("Your Default Data Would Be Updated")
+#====================================================================
 print("Press n To Add New Gesture")
 while True:
     ig, frame = cam.read()
@@ -94,12 +121,15 @@ while True:
     frame = cv2.flip(frame, 1)
     cur_gesture = np.zeros([12,12], dtype=np.float32)
     handLM = HandData.findHands(frame)
+
     for LM in handLM:
         cur_gesture = readGesture(LM)
 #================================================= Training the software
     if train:
         #=========================================== entering the name
         if name:
+            cv2.imshow('Frame', frame)
+            cv2.moveWindow('Frame', 0,0)
             if name_prompt:
                 print("Please Do Not Exit While Recording Gesture ^^")
                 print("Enter Gesture Name: ")
@@ -122,9 +152,11 @@ while True:
             if cv2.waitKey(1) & 0xff == ord('t'):
                 known_gestures.append(cur_gesture)
                 known_gest_sums.append(cur_gesture.sum())
+                with open('gesture.pkl', 'wb') as l:
+                    pickle.dump(known_gestures, l)
+                    pickle.dump(all_names, l)
                 record_prompt = True
                 name_prompt = True
-                name = True
                 train = False
         #============================================ recorded
 #========================================================= gesture learned
@@ -146,14 +178,17 @@ while True:
             cv2.putText(frame, all_names[index], (0, 80), cv2.FONT_HERSHEY_COMPLEX, 3, (0,0,255), 3)
         else :
             cv2.putText(frame, 'Unknown', (0, 40), cv2.FONT_HERSHEY_COMPLEX, 2, (0,0,255), 3)
-
-    cv2.imshow('Frame', frame)
-    cv2.moveWindow('Frame', 0,0)
+    if not name:
+        cv2.imshow('Frame', frame)
+        cv2.moveWindow('Frame', 0,0)
 
     if not train:
         k = cv2.waitKey(1)
+        if k == 105:   #f
+            print("i: For Instrutions \nn: To Add New Gesture \np: To Print All Recorded Gestures \nq: To Quit")
         if k == 110:   #n
             train = True
+            name = True
         if k == 112:   #p
             print(all_names)
             print(len(known_gest_sums))
