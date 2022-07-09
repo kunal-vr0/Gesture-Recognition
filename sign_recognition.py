@@ -80,7 +80,7 @@ tolerance = 3
 #=====================
 train = False
 record_prompt = False
-name = True
+name = False
 name_prompt = True
 #=====================
 gesture_name = ''
@@ -121,12 +121,15 @@ while True:
     frame = cv2.flip(frame, 1)
     cur_gesture = np.zeros([12,12], dtype=np.float32)
     handLM = HandData.findHands(frame)
+
     for LM in handLM:
         cur_gesture = readGesture(LM)
 #================================================= Training the software
     if train:
         #=========================================== entering the name
         if name:
+            cv2.imshow('Frame', frame)
+            cv2.moveWindow('Frame', 0,0)
             if name_prompt:
                 print("Please Do Not Exit While Recording Gesture ^^")
                 print("Enter Gesture Name: ")
@@ -154,7 +157,6 @@ while True:
                     pickle.dump(all_names, l)
                 record_prompt = True
                 name_prompt = True
-                name = True
                 train = False
         #============================================ recorded
 #========================================================= gesture learned
@@ -176,16 +178,17 @@ while True:
             cv2.putText(frame, all_names[index], (0, 80), cv2.FONT_HERSHEY_COMPLEX, 3, (0,0,255), 3)
         else :
             cv2.putText(frame, 'Unknown', (0, 40), cv2.FONT_HERSHEY_COMPLEX, 2, (0,0,255), 3)
-
-    cv2.imshow('Frame', frame)
-    cv2.moveWindow('Frame', 0,0)
+    if not name:
+        cv2.imshow('Frame', frame)
+        cv2.moveWindow('Frame', 0,0)
 
     if not train:
         k = cv2.waitKey(1)
-        if k == 105:   #i
+        if k == 105:   #f
             print("i: For Instrutions \nn: To Add New Gesture \np: To Print All Recorded Gestures \nq: To Quit")
         if k == 110:   #n
             train = True
+            name = True
         if k == 112:   #p
             print(all_names)
             print(len(known_gest_sums))
