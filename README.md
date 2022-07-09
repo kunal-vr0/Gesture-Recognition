@@ -1,11 +1,11 @@
 # Gesture-Recognition
-This is a idea of this project is to train the software by recording different gestures and be able to recognise them.
-I am using openCV for computer vision and meidapipe for hand detection.
+The idea of this project is to train the program by recording different gestures and be able to recognise them.
+I am using openCV for computer vision, meidapipe for hand detection and pickle to store data.
 For each hand gesture it records 144 data points and compare them with the recorded gesture and reports positively within some level of tolerance.
 
 Instructions for usage:
 
-#1. Currently, Initially there are no prerecorded gestures.
+#1. You can provide a data file to use or record gestures from scratch. If you wish to use some data file it asks for the file name or a default file can be used.
 
 #2. Press 'n' to add a new entry.
 
@@ -19,3 +19,4 @@ Instructions for usage:
 
 #7. To view the currently added gesture names and number of gestures present in the database press 'p'. Cannot be used while recording the gesture.
 
+#8. To view the commands press 'i', this will print the purpose of each key.
