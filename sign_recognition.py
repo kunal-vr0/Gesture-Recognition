@@ -68,6 +68,19 @@ def readGesture(allpts):
     
     return gestureData
 #=====================================================================================================================================================================================
+#=====================================================================================================================================================================================
+sim_angle = 0.25
+def Error(current, known):
+    similarity = np.zeros([12,12], dtype=np.float32)
+    for i in range(12):
+        for j in range(12):
+            if abs(current[i][j] - known[i][j]) < sim_angle:
+                similarity[i][j] = 0;
+            else:
+                similarity[i][j] = abs(current[i][j] - known[i][j])
+    
+    return similarity
+#=====================================================================================================================================================================================
 
 cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 cam.set(cv2.CAP_PROP_FRAME_WIDTH, width)
@@ -76,7 +89,7 @@ cam.set(cv2.CAP_PROP_FPS, 30)
 cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
 HandData = HandDet(1)
 #=====================
-tolerance = 3
+tolerance = 3 #4
 #=====================
 train = False
 record_prompt = False
@@ -86,7 +99,6 @@ name_prompt = True
 gesture_name = ''
 all_names = []
 known_gestures = []
-known_gest_sums = []  #==========
 #===========================
 fileName = 'gesture.pkl'
 #==================================================================== Wanna Use existing file?
@@ -109,8 +121,6 @@ if useFile == 'Y':
     else:
         known_gestures = pickle.load(l)
         all_names = pickle.load(l)
-    for i in known_gestures:
-        known_gest_sums.append(i.sum())
 elif useFile == 'N':
     print("Your Default Data Would Be Updated")
 #====================================================================
@@ -151,7 +161,6 @@ while True:
                 record_prompt = False
             if cv2.waitKey(1) & 0xff == ord('t'):
                 known_gestures.append(cur_gesture)
-                known_gest_sums.append(cur_gesture.sum())
                 with open('gesture.pkl', 'wb') as l:
                     pickle.dump(known_gestures, l)
                     pickle.dump(all_names, l)
@@ -162,18 +171,18 @@ while True:
 #========================================================= gesture learned
 #========================================================= gesture recognition
     else:
-        errors = []
-        for known_gesture in known_gest_sums:
-            b = cur_gesture.sum()
-            error = (known_gesture-b)
-            errors.append(abs(error))
+        all_errors = []
+        errors = np.zeros([12,12], dtype=np.float32)
+        for known_gesture in known_gestures:
+            errors = Error(cur_gesture, known_gesture)
+            total_error = errors.sum()
+            all_errors.append(total_error)
         index = None
-        if errors:
-            best_match = min(errors)
+        if all_errors:
+            best_match = min(all_errors)
             if best_match < tolerance:
-                index = errors.index(best_match)
-                #print(best_match, 'Index: ',index)
-
+                index = all_errors.index(best_match)
+#==============================================================
         if index != None:
             cv2.putText(frame, all_names[index], (0, 80), cv2.FONT_HERSHEY_COMPLEX, 3, (0,0,255), 3)
         else :
@@ -184,16 +193,15 @@ while True:
 
     if not train:
         k = cv2.waitKey(1)
-        if k == 105:   #f
+        if k == 105:   #i
             print("i: For Instrutions \nn: To Add New Gesture \np: To Print All Recorded Gestures \nq: To Quit")
         if k == 110:   #n
             train = True
             name = True
         if k == 112:   #p
             print(all_names)
-            print(len(known_gest_sums))
-            print(known_gest_sums)
-            print(errors)
+            print(len(all_errors))
+            print(all_errors)
         if k == 113:   #q
             break
 
